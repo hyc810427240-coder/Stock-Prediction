@@ -15,6 +15,51 @@ from web_app import analyze_stock  # noqa: E402
 
 st.set_page_config(page_title="A股单股次日量化建议", layout="wide")
 
+st.markdown(
+    """
+    <style>
+    .metric-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+    .metric-card {
+        min-height: 92px;
+        padding: 14px 16px;
+        border: 1px solid #d8ddd6;
+        border-radius: 8px;
+        background: #e9f2ee;
+    }
+    .metric-card .label {
+        color: #65716c;
+        font-size: 13px;
+        margin-bottom: 10px;
+    }
+    .metric-card .value {
+        color: #1d2522;
+        font-size: 28px;
+        font-weight: 760;
+        line-height: 1.1;
+        word-break: break-word;
+    }
+    .advice-card {
+        padding: 14px 16px;
+        border: 2px solid #d94747;
+        border-radius: 8px;
+        background: #fffafa;
+        line-height: 1.75;
+    }
+    .advice-card strong {
+        color: #b33b36;
+    }
+    .stDataFrame div[data-testid="stDataFrame"] {
+        border-radius: 8px;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 
 @st.cache_data(ttl=300, show_spinner=False)
 def cached_analyze(stock: str):
@@ -28,10 +73,34 @@ def pct(value):
 
 
 def metric_table(items):
-    cols = st.columns(2)
-    for idx, item in enumerate(items):
-        with cols[idx % 2]:
-            st.metric(item["label"], item["value"])
+    html = ['<div class="metric-grid">']
+    for item in items:
+        html.append(
+            '<div class="metric-card">'
+            f'<div class="label">{item["label"]}</div>'
+            f'<div class="value">{item["value"]}</div>'
+            "</div>"
+        )
+    html.append("</div>")
+    st.markdown("".join(html), unsafe_allow_html=True)
+
+
+def model_dataframe(models):
+    df = pd.DataFrame(models).rename(
+        columns={
+            "name": "模型",
+            "winRate": "历史胜率",
+            "avgReturn": "历史收益",
+            "predWin": "预测胜率",
+            "predReturn": "预测收益",
+            "signal": "信号",
+            "sampleSize": "样本数",
+        }
+    )
+    for col in ["历史胜率", "历史收益", "预测胜率", "预测收益"]:
+        if col in df.columns:
+            df[col] = df[col].map(lambda x: "--" if pd.isna(x) else f"{x:.2f}%")
+    return df
 
 
 def draw_price_chart(chart):
@@ -111,22 +180,28 @@ top_left, top_right = st.columns([1.2, 1])
 with top_left:
     stars = int(data["tradePlan"].get("stars") or 1)
     st.header(f"{data['action']}  {'★' * stars}{'☆' * (5 - stars)}")
-    st.error(
-        "第二天操作建议\n\n"
-        f"{data['tradePlan']['advice']}\n\n"
+    st.markdown(
+        '<div class="advice-card">'
+        "<strong>第二天操作建议</strong><br>"
+        f"{data['tradePlan']['advice']}<br>"
         f"支撑位 {data['tradePlan']['support']} · 压力位 {data['tradePlan']['resistance']} · 止损参考 {data['tradePlan']['stopLoss']}"
+        "</div>",
+        unsafe_allow_html=True,
     )
     st.caption(f"模型摘要：{data['reason']}")
 
 with top_right:
-    cols = st.columns(2)
-    cols[0].metric("收盘", data["weighted"]["close"])
-    cols[1].metric("换手率", pct(data["weighted"]["turnover"]))
-    cols[0].metric("KDJ-J", data["weighted"]["kdjJ"])
-    cols[1].metric("BOLL位置", data["weighted"]["bollPct"])
+    metric_table(
+        [
+            {"label": "收盘", "value": data["weighted"]["close"]},
+            {"label": "换手率", "value": pct(data["weighted"]["turnover"])},
+            {"label": "KDJ-J", "value": data["weighted"]["kdjJ"]},
+            {"label": "BOLL位置", "value": data["weighted"]["bollPct"]},
+        ]
+    )
 
 st.subheader("模型结果")
-st.dataframe(pd.DataFrame(data["models"]), use_container_width=True, hide_index=True)
+st.dataframe(model_dataframe(data["models"]), use_container_width=True, hide_index=True)
 
 chart_col, info_col = st.columns([1.1, 0.9])
 with chart_col:
