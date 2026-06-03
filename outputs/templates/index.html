@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>单股次日量化建议</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
+</head>
+<body>
+  <main class="shell">
+    <section class="workspace">
+      <div class="query-panel">
+        <div>
+          <p class="eyebrow">A股单股模型</p>
+          <h1>次日买卖建议</h1>
+        </div>
+        <form id="stockForm" class="search-row">
+          <label class="sr-only" for="stockInput">股票名称或代码</label>
+          <input id="stockInput" name="stock" value="城地香江" autocomplete="off" placeholder="输入股票名或代码，如 城地香江 / 603887">
+          <button id="runBtn" type="submit">
+            <span class="btn-icon">▶</span>
+            <span>运行模型</span>
+          </button>
+        </form>
+      </div>
+
+      <section id="status" class="status">等待运行</section>
+
+      <section id="result" class="result-grid hidden">
+        <div class="summary-band">
+          <div>
+            <p class="muted" id="stockMeta"></p>
+            <div class="action-row">
+              <h2 id="actionText"></h2>
+              <div class="stars" aria-label="五星评分"><span id="starText">☆☆☆☆☆</span><small id="starScore">0/5</small></div>
+            </div>
+            <div class="trade-advice" id="tradeAdvice"></div>
+            <p class="model-reason" id="reasonText"></p>
+          </div>
+          <div class="metrics">
+            <div><span>收盘</span><strong id="closeMetric">--</strong></div>
+            <div><span>换手率</span><strong id="turnoverMetric">--</strong></div>
+            <div><span>KDJ-J</span><strong id="kdjMetric">--</strong></div>
+            <div><span>BOLL位置</span><strong id="bollMetric">--</strong></div>
+          </div>
+        </div>
+
+        <div class="main-grid">
+          <section class="panel model-panel">
+            <div class="panel-head">
+              <h3>模型结果</h3>
+              <span id="targetDef"></span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>模型</th>
+                    <th>历史胜率</th>
+                    <th>历史收益</th>
+                    <th>预测胜率</th>
+                    <th>预测收益</th>
+                    <th>信号</th>
+                    <th>样本</th>
+                  </tr>
+                </thead>
+                <tbody id="modelBody"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="panel chart-panel">
+            <div class="panel-head">
+              <h3>近90日价格与BOLL</h3>
+              <span id="dataSource"></span>
+            </div>
+            <canvas id="priceChart" width="860" height="360"></canvas>
+          </section>
+        </div>
+
+        <div class="side-grid">
+          <section class="panel">
+            <div class="panel-head">
+              <h3>关键指标</h3>
+            </div>
+            <dl id="indicatorList" class="indicator-list">
+              <div><dt>MACD柱</dt><dd>--</dd></div>
+              <div><dt>成本收益估计</dt><dd>--</dd></div>
+              <div><dt>最近交易日</dt><dd>--</dd></div>
+              <div><dt>量比</dt><dd>--</dd></div>
+            </dl>
+          </section>
+
+          <section class="panel">
+            <div class="panel-head">
+              <h3>重要讯息</h3>
+            </div>
+            <ul id="newsList" class="news-list"></ul>
+          </section>
+
+          <section class="panel fundamentals-panel">
+            <div class="panel-head">
+              <h3>最近财报</h3>
+              <span id="fundChartMeta">指标 / 同比</span>
+            </div>
+            <div id="fundMetricTabs" class="metric-tabs"></div>
+            <canvas id="fundChart" width="920" height="360"></canvas>
+            <div id="fundamentals" class="financial-list"></div>
+          </section>
+        </div>
+      </section>
+    </section>
+  </main>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

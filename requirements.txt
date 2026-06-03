@@ -1,0 +1,7 @@
+baostock
+flask
+lightgbm
+numpy
+pandas
+requests
+scikit-learn

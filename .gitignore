@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Generated model outputs
+outputs/*_features_*.csv
+outputs/*_web_features_*.csv
+outputs/*_quant_report_*.md
+outputs/*_screenshot.png
+outputs/*.bundle
+
+# Local caches and logs
+.pytest_cache/
+*.log
