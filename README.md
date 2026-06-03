@@ -13,6 +13,15 @@
 
 ## 本地运行
 
+### Streamlit
+
+```powershell
+pip install -r requirements.txt
+streamlit run .\streamlit_app.py
+```
+
+### Flask
+
 ```powershell
 pip install -r requirements.txt
 python .\outputs\web_app.py
@@ -34,3 +43,11 @@ python .\outputs\stock_quant_app.py 603887 --out .\outputs
 ## 说明
 
 模型结果用于研究和交易前筛选，不构成投资建议。免费数据源可能存在延迟、限流或字段缺失，实盘前需要进一步校验。
+
+## Streamlit Community Cloud 部署
+
+在 Streamlit Community Cloud 新建应用时选择本仓库，并将入口文件设置为：
+
+```text
+streamlit_app.py
+```
